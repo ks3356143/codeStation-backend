@@ -1,5 +1,7 @@
 from pathlib import Path
 import os
+# 导入NINJA_JWT配置
+from CoderStation.conf.jwt_config import *
 
 # 项目目录
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,7 +23,8 @@ INSTALLED_APPS = [
     'ninja_extra',
     'ninja_jwt',
     # apps
-    'apps.user'
+    'apps.user',
+    'apps.issue'
 ]
 
 MIDDLEWARE = [

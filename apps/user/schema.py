@@ -1,7 +1,7 @@
 from apps.user.models import User
 from ninja import ModelSchema
 
-# 输出：查询用户信息
+# 1.输出：查询用户信息
 class UserInfoOutSchema(ModelSchema):
     class Meta:
         model = User

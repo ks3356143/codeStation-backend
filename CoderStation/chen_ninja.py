@@ -15,7 +15,6 @@ class ChenNinjaAPI(NinjaExtraAPI):
             "success": True
         }
         # 这里写包裹处理代码：
-
         content = self.renderer.render(request, std_data, response_status=status)
         content_type = "{}; charset={}".format(
             self.renderer.media_type, self.renderer.charset

@@ -12,14 +12,15 @@ class DateEncoder(json.JSONEncoder):
 
 # 重写django的HttpResponse，注意返回的是axios里面的data而非外层HTTP
 class ChenResponse(HttpResponse):
-    def __init__(self, data=None, message='success', code=200, *args, **kwargs):
+    def __init__(self, data=None, message='success', success=True, code=200, *args, **kwargs):
         if data is None:
             data = {}
+        # 序列化
         std_data = {
             "code": code,
             "data": data,
             "message": message,
-            "success": True
+            "success": success
         }
         data = json.dumps(std_data, cls=DateEncoder)
         super().__init__(data, *args, **kwargs)

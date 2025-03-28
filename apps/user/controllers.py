@@ -15,7 +15,7 @@ class UserJWTController(TokenObtainPairController):
     # 获取用户信息接口
     @route.get("/get_info", response=UserInfoOutSchema, auth=JWTAuth(), url_name='user_get_info')
     def get_info(self):
-        return ChenResponse(message='获取信息成功', data=self.context.request.auth, code=200)  # type:ignore
+        return 200, self.context.request.auth  # type:ignore
 
     # 用户退出登录，前端不储存JWT令牌即可退出登录
     @route.post("/logout", url_name='user_logout', auth=JWTAuth())
