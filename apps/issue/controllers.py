@@ -1,52 +1,37 @@
-from django.db.models import QuerySet
-from typing import Union, List, Any
-from ninja_extra import (ModelConfig,
-                         ModelControllerBase,
-                         ModelSchemaConfig,
-                         ModelPagination,
-                         api_controller,
-                         ModelService)
-from ninja import ModelSchema
-from apps.issue.models import Issue, IssueType
-from apps.user.models import User
+from ninja import Schema
+
+from apps.issue.models import Issue
+from ninja_extra import (
+    api_controller,
+    ModelControllerBase,
+    ModelEndpointFactory,
+    ModelConfig
+)
+# schema和service导入
+from apps.issue.schema import IssueListOutSchema
+from apps.issue.service import IssueModelService
+# 导入自己的分页
+from utils.pagination import MyPageNumberPaginationExtra, MyPaginatedResponseSchema
 
 # ~~~~问答模型~~~~
-class NestUserOutSchema(ModelSchema):
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'name']
-
-class NestTypeOutSchema(ModelSchema):
-    class Meta:
-        model = IssueType
-        fields = "__all__"
-
-class IssueRetrieveSchema(ModelSchema):
-    user: NestUserOutSchema
-    type: NestTypeOutSchema
-
-    class Meta:
-        model = Issue
-        exclude = ['user', 'type']
-
-class IssueService(ModelService):
-    def get_all(self, **kwargs: Any) -> Union[QuerySet, List[Any]]:
-        # 条件筛选-去除未审查的问答
-        queryset = super().get_all(**kwargs)
-        return queryset.filter(status=True)
-
 @api_controller('/issue')
 class IssueModelController(ModelControllerBase):
-    service_type = IssueService
+    # 接口工程：条件查询所有Issue(注意屏蔽自动接口)
+    list_issues = ModelEndpointFactory.list(
+        path="/?enabled=str",
+        schema_out=IssueListOutSchema,
+        queryset_getter=lambda self, **kw: self.service.get_all(**kw),
+        pagination_class=MyPageNumberPaginationExtra,
+        pagination_response_schema=MyPaginatedResponseSchema,
+        max_page_size=100,
+        page_size=10,
+        tags=['issuemodel-custom'],
+        url_name='issue-list'
+    )
+
+    # 自定义操作服务
+    service_type = IssueModelService
     model_config = ModelConfig(
         model=Issue,
-        # 修改检索Schema输出
-        retrieve_schema=IssueRetrieveSchema,
-        schema_config=ModelSchemaConfig(read_only_fields=['id', 'update_date', 'create_date'],
-                                        depth=1),  # type:ignore
-        pagination=ModelPagination(
-            paginator_kwargs={
-                'page_size': 10
-            }
-        )
+        allowed_routes=["create", "find_one", "update", "patch", "delete"]
     )

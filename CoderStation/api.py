@@ -3,11 +3,12 @@ from CoderStation.chen_ninja import ChenNinjaAPI
 from CoderStation.parser import MyParser
 from CoderStation.renderer import MyRenderer
 # 导入ninja_extra的APIException改造
-from ninja_extra.exceptions import APIException, status
+from ninja_extra.exceptions import APIException
 from ninja.errors import HttpError
 from utils.chen_response import ChenResponse
 from utils import code_list
 from ninja_extra.exceptions import ErrorDetail
+from ninja.errors import ValidationError
 
 api = ChenNinjaAPI(
     title='CodeStation问答平台',
@@ -24,7 +25,7 @@ def transform_extra_exception(request, exc):
     code = code_list.USERNAME_OR_PASSWORD_ERROR_CODE
     if isinstance(exc.detail, ErrorDetail):
         # 1.判断是否为分页404错误
-        message = exc.detail.replace('Invalid page. ','错误的页面参数:')
+        message = exc.detail.replace('Invalid page. ', '错误的页面参数:')
         code = code_list.QUERY_NOTHING_ERROR_CODE
     else:
         message = exc.detail['detail']
@@ -44,6 +45,14 @@ def transform_jwt_exception(request, exc):
     if message == 'Unauthorized':
         code = code_list.USER_UNAUTHORIZATION_ERRRR_CODE
         message = '用户没有经过授权就访问'
+    return ChenResponse(code=code, status=status_code, data='', message=message, success=False)
+
+# 捕获pydantic的Validation异常
+@api.exception_handler(ValidationError)
+def transform_validation_error_exception(request, exc):
+    code = code_list.PARAMS_TYPE_OR_REQUIRED_ERROR_CODE
+    status_code = 422
+    message = "您的参数输入缺省或类型错误"
     return ChenResponse(code=code, status=status_code, data='', message=message, success=False)
 
 # 自动找INSTALL_APPS里面的东西
