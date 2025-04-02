@@ -1,3 +1,4 @@
+from typing import List
 from ninja_extra import api_controller, route
 from ninja_jwt.controller import TokenObtainPairController
 from django.contrib.auth import get_user_model
@@ -21,3 +22,8 @@ class UserJWTController(TokenObtainPairController):
     @route.post("/logout", url_name='user_logout', auth=JWTAuth())
     def logout(self):
         return ChenResponse(message='退出登录成功', data="", code=200)
+
+    # 获取积分前十的用户
+    @route.get("/points_rank", response=List[UserInfoOutSchema], url_name='user_points_rank')
+    def points_rank(self):
+        return User.objects.order_by('-points')[:10].iterator()

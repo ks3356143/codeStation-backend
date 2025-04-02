@@ -1,5 +1,3 @@
-from ninja import Schema
-
 from apps.issue.models import Issue
 from ninja_extra import (
     api_controller,

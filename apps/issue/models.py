@@ -9,12 +9,13 @@ class Issue(models.Model):
     issueContent = models.TextField(max_length=10240, verbose_name='问答内容')
     # 关联用户，用户删除其问答删除
     user = models.ForeignKey(User, to_field="id", on_delete=models.CASCADE)
-    # 关联类型，类型删除，设置为NULL值，后续注意处理
-    type = models.ForeignKey("IssueType", to_field="id", on_delete=models.SET_NULL, null=True)
     create_date = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     update_date = models.DateTimeField(auto_now=True, verbose_name='更新时间')
     # 审核是否通过，默认False
     status = models.BooleanField(default=False)
+    # 浏览数量和评论数量
+    commentNumber = models.IntegerField(default=0, verbose_name='评论数')
+    scanNumber = models.IntegerField(default=0, verbose_name='浏览数')
 
 class IssueType(models.Model):
     """问答类型表"""
