@@ -5,4 +5,4 @@ from ninja import ModelSchema
 class UserInfoOutSchema(ModelSchema):
     class Meta:
         model = User
-        exclude = ['id', 'password', 'groups', 'user_permissions', 'is_superuser', 'is_staff', 'is_active']
+        exclude = ['password', 'groups', 'user_permissions', 'is_superuser', 'is_staff', 'is_active']

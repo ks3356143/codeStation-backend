@@ -1,5 +1,5 @@
 from apps.user.models import User
-from apps.issue.models import Issue, Issue2Type
+from apps.issue.models import Issue, Issue2Type, Comment
 from ninja import ModelSchema
 from typing import List
 
@@ -30,3 +30,38 @@ class IssueListOutSchema(ModelSchema):
     class Meta:
         model = Issue
         exclude = ['user']
+
+# 这个和上面区别是type返回的不是python而是问答类型的id
+class IssueRetrieveOutSchema(ModelSchema):
+    user: NestUserOutSchema
+    create_date: str
+    type: List[str] = []
+
+    @staticmethod
+    def resolve_create_date(obj):
+        return obj.create_date.strftime("%Y-%m-%d %H:%M:%S")
+
+    @staticmethod
+    def resolve_type(obj):
+        qs = Issue2Type.objects.filter(iid__id=obj.id).select_related("tid")
+        type_list = [t.tid.id for t in qs]
+        return type_list
+
+    class Meta:
+        model = Issue
+        exclude = ['user']
+
+# 新增/修改Schema
+class IssueCreateSchema(ModelSchema):
+    type_id: str
+    user_id: str
+
+    class Meta:
+        model = Issue
+        fields = ['issueTitle', 'issueContent']
+
+# ~~~~Comment Schema~~~~
+class CommentOutSchema(ModelSchema):
+    class Meta:
+        model = Comment
+        fields = "__all__"

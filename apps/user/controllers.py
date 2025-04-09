@@ -13,10 +13,16 @@ User = get_user_model()  # type:ignore
 class UserJWTController(TokenObtainPairController):
     auto_import = True  # 自动导入到接口
 
-    # 获取用户信息接口
+    # 获取用户信息接口-当前登录用户
     @route.get("/get_info", response=UserInfoOutSchema, auth=JWTAuth(), url_name='user_get_info')
     def get_info(self):
         return 200, self.context.request.auth  # type:ignore
+
+    # 获取用户信息-传入user_id
+    @route.get("/get_info_by_id", response=UserInfoOutSchema, url_name='user_get_info_by_id')
+    def get_info_by_id(self, user_id: str):
+        instance = User.objects.filter(id=user_id).first()
+        return instance
 
     # 用户退出登录，前端不储存JWT令牌即可退出登录
     @route.post("/logout", url_name='user_logout', auth=JWTAuth())

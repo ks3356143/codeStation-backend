@@ -26,3 +26,19 @@ class Issue2Type(models.Model):
     """问答表和类型-多对多关系表"""
     iid = models.ForeignKey("Issue", on_delete=models.CASCADE, verbose_name='问答ID')
     tid = models.ForeignKey("IssueType", on_delete=models.CASCADE, verbose_name='问答类型ID')
+
+# 书籍类型：1为问答评论，2为书籍评论
+comment_type_coices = ((0, '问答'), (1, '书籍'))
+
+class Comment(models.Model):
+    """评论模型"""
+    id = ShortUUIDField(primary_key=True)
+    user = models.ForeignKey(User, to_field="id", on_delete=models.CASCADE)
+    # 因为评论类型为2时候为书籍评论，此项应该为null
+    issue = models.ForeignKey(Issue, to_field='id', on_delete=models.CASCADE, null=True)
+    type = models.ManyToManyField(IssueType, verbose_name='评论关联的问答类型')
+    commentType = models.SmallIntegerField(verbose_name='评论类型', default=1, choices=comment_type_coices)
+    commentContent = models.TextField(max_length=10240, verbose_name='评论内容')
+    # book关联书籍-后面添加
+    create_date = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    update_date = models.DateTimeField(auto_now=True, verbose_name='更新时间')
