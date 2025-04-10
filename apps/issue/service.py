@@ -4,7 +4,7 @@ from django.db.models import QuerySet
 from ninja_extra import ModelService
 from pydantic import BaseModel as PydanticModel
 
-from apps.issue.models import Issue2Type, IssueType
+from apps.issue.models import Issue2Type, IssueType, Issue
 # 导入Schema以便类型提示
 from apps.issue.schema import IssueCreateSchema
 
@@ -12,13 +12,22 @@ from apps.issue.schema import IssueCreateSchema
 class IssueModelService(ModelService):
     def get_all(self, **kwargs: t.Any) -> t.Union[QuerySet, t.List[t.Any]]:
         issues = self.model.objects.all()
-        # status字段筛选
+        # 1.status字段筛选
         enabled = kwargs.get('enabled')
         status = True
         if enabled:
             if enabled.lower() in ('false', '0', 'undefined', 'null'):
                 status = False
-        return issues.filter(status=status).order_by('-create_date')
+        # 2.type的筛选
+        issues = issues.filter(status=status).order_by('-create_date')
+        type_id = kwargs.get('type')
+        if type_id == 'all':
+            return issues
+        type_obj = IssueType.objects.filter(id=type_id).first()
+        if not type_obj:
+            return []
+        issue_ids = type_obj.issue2type_set.order_by('-iid__create_date').values_list('iid', flat=True)
+        return Issue.objects.filter(id__in=issue_ids).order_by('-create_date')
 
     # 修改新增方法，多对多字段修改
     def create(self, schema: IssueCreateSchema, **kwargs: t.Any) -> t.Any:

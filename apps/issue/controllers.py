@@ -1,23 +1,39 @@
+from django.db.models import Q
 from apps.issue.models import Issue, IssueType, Comment
+from ninja import Query
 from ninja_extra import (
+    route,
     api_controller,
     ModelControllerBase,
     ModelEndpointFactory,
     ModelConfig,
-    ModelSchemaConfig
+    ModelSchemaConfig,
+    paginate
 )
 # schema和service导入
-from apps.issue.schema import IssueListOutSchema, IssueCreateSchema, CommentOutSchema,IssueRetrieveOutSchema
+from apps.issue.schema import IssueListOutSchema, IssueCreateSchema, CommentOutSchema, IssueRetrieveOutSchema
 from apps.issue.service import IssueModelService, CommentModelService
 # 导入自己的分页
 from utils.pagination import MyPageNumberPaginationExtra, MyPaginatedResponseSchema
+# 导入过滤Schema
+from apps.issue.filterSchemas import IssueFilterSchema
 
 # ~~~~问答模型~~~~
 @api_controller('/issue')
 class IssueModelController(ModelControllerBase):
+    @route.get("/getIssuesByContent/", response=MyPaginatedResponseSchema[IssueListOutSchema],
+               url_name='get_issue_by_content',
+               tags=['问答接口'], summary='搜索内容查询问答')
+    @paginate(MyPageNumberPaginationExtra, page_size=10)
+    def get_issue_by_content(self, filters: IssueFilterSchema = Query(...)):
+        searchValue = filters.searchValue
+        q = Q(issueTitle__icontains=searchValue) | Q(issueContent__icontains=searchValue)
+        issues = Issue.objects.filter(q)
+        return issues
+
     # 接口工程：条件查询所有Issue(注意屏蔽自动接口)
     list_issues = ModelEndpointFactory.list(
-        path="/?enabled=str",
+        path="/?enabled=str&type=str",
         schema_out=IssueListOutSchema,
         queryset_getter=lambda self, **kw: self.service.get_all(**kw),
         pagination_class=MyPageNumberPaginationExtra,
