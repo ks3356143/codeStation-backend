@@ -1,7 +1,13 @@
 from apps.user.models import User
-from apps.issue.models import Issue, Issue2Type, Comment
-from ninja import ModelSchema
+from apps.issue.models import Issue, Issue2Type, IssueType, Comment, Quiz
+from ninja import ModelSchema, Schema
 from typing import List
+
+# 预制type
+class TypeModelSchema(ModelSchema):
+    class Meta:
+        model = IssueType
+        fields = '__all__'
 
 # list：问答接口Schemas
 class NestUserOutSchema(ModelSchema):
@@ -65,3 +71,12 @@ class CommentOutSchema(ModelSchema):
     class Meta:
         model = Comment
         fields = "__all__"
+
+# ~~~~Quiz Schema~~~~
+class QuizTitleSchema(Schema):
+    id: str
+    quizTitle: str
+
+class QuizOnlyTitleSchema(Schema):
+    type: TypeModelSchema
+    titles: list[QuizTitleSchema]

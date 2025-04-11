@@ -42,3 +42,12 @@ class Comment(models.Model):
     # book关联书籍-后面添加
     create_date = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     update_date = models.DateTimeField(auto_now=True, verbose_name='更新时间')
+
+class Quiz(models.Model):
+    """考试题模型"""
+    id = ShortUUIDField(primary_key=True)
+    quizTitle = models.CharField(max_length=128, verbose_name='考试题标题')
+    quizContent = models.TextField(max_length=10240, verbose_name='考试题内容')
+    type = models.ForeignKey(IssueType, to_field='id', on_delete=models.CASCADE)
+    create_date = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    update_date = models.DateTimeField(auto_now=True, verbose_name='更新时间')

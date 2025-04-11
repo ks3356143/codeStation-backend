@@ -1,5 +1,5 @@
 from django.db.models import Q
-from apps.issue.models import Issue, IssueType, Comment
+from apps.issue.models import Issue, IssueType, Comment, Quiz
 from ninja import Query
 from ninja_extra import (
     route,
@@ -8,10 +8,11 @@ from ninja_extra import (
     ModelEndpointFactory,
     ModelConfig,
     ModelSchemaConfig,
-    paginate
+    paginate, ModelPagination
 )
 # schema和service导入
-from apps.issue.schema import IssueListOutSchema, IssueCreateSchema, CommentOutSchema, IssueRetrieveOutSchema
+from apps.issue.schema import IssueListOutSchema, IssueCreateSchema, CommentOutSchema, IssueRetrieveOutSchema, \
+    QuizOnlyTitleSchema
 from apps.issue.service import IssueModelService, CommentModelService
 # 导入自己的分页
 from utils.pagination import MyPageNumberPaginationExtra, MyPaginatedResponseSchema
@@ -19,7 +20,7 @@ from utils.pagination import MyPageNumberPaginationExtra, MyPaginatedResponseSch
 from apps.issue.filterSchemas import IssueFilterSchema
 
 # ~~~~问答模型~~~~
-@api_controller('/issue')
+@api_controller('/issue', tags=['问答'])
 class IssueModelController(ModelControllerBase):
     @route.get("/getIssuesByContent/", response=MyPaginatedResponseSchema[IssueListOutSchema],
                url_name='get_issue_by_content',
@@ -68,7 +69,7 @@ class IssueModelController(ModelControllerBase):
     )
 
 # ~~~~问答类型模型~~~~
-@api_controller('/type')
+@api_controller('/type', tags=['类型'])
 class TypeModelController(ModelControllerBase):
     model_config = ModelConfig(
         model=IssueType,
@@ -87,7 +88,7 @@ class TypeModelController(ModelControllerBase):
     )
 
 # ~~~~评论模型~~~~
-@api_controller('/comment')
+@api_controller('/comment', tags=['评论'])
 class CommentModelController(ModelControllerBase):
     list_comments = ModelEndpointFactory.list(
         path="/?issue_id=str",
@@ -111,4 +112,40 @@ class CommentModelController(ModelControllerBase):
             read_only_fields=["id", 'create_date', 'update_date'],
             exclude=set(),
         ),
+    )
+
+# ~~~~题目模型~~~~
+@api_controller('/quiz', tags=['考试题'])
+class QuizModelController(ModelControllerBase):
+    # 只获取quiz的分类和标题
+    @route.get('/getByType/', url_name='quiz_by_type', response=list[QuizOnlyTitleSchema])
+    def get_by_type(self):
+        # 先查询所有type - 使用prefetch查询减少查询量
+        types = IssueType.objects.prefetch_related('quiz_set').all()
+        # 组合返回对象
+        res_list = [{
+            "type": type_obj,
+            'titles': [
+                {"id": quiz.id, 'quizTitle': quiz.quizTitle}
+                for quiz in type_obj.quiz_set.only('id', 'quizTitle')
+            ]
+        }
+            for type_obj in types]
+        return res_list
+
+    model_config = ModelConfig(
+        model=Quiz,
+        allowed_routes=['list', 'find_one'],
+        pagination=ModelPagination(
+            klass=MyPageNumberPaginationExtra,
+            pagination_schema=MyPaginatedResponseSchema,
+            paginator_kwargs={
+                "page_size": 10
+            }
+        ),
+        schema_config=ModelSchemaConfig(
+            read_only_fields=['id', 'create_date', 'update_date'],
+            exclude=set(),
+            depth=1,
+        )
     )
