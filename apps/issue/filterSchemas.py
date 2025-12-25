@@ -5,3 +5,8 @@ from typing import Optional
 class IssueFilterSchema(FilterSchema):
     searchValue: Optional[str] = Field("")
     searchOption: Optional[str] = Field("issue")
+
+# 2、搜索book的标题和内容
+class BookFilterSchema(FilterSchema):
+    searchValue: Optional[str] = Field("")
+    searchOption: Optional[str] = Field("book")

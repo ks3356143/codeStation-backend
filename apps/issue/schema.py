@@ -1,5 +1,5 @@
 from apps.user.models import User
-from apps.issue.models import Issue, Issue2Type, IssueType, Comment, Quiz
+from apps.issue.models import Issue, Issue2Type, IssueType, Comment, Book
 from ninja import ModelSchema, Schema
 from typing import List
 
@@ -80,3 +80,11 @@ class QuizTitleSchema(Schema):
 class QuizOnlyTitleSchema(Schema):
     type: TypeModelSchema
     titles: list[QuizTitleSchema]
+
+# ~~~~Book Schema~~~~
+class BookOutSchema(ModelSchema):
+    type: TypeModelSchema
+
+    class Meta:
+        model = Book
+        exclude = ['type']

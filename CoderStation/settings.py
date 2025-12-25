@@ -77,3 +77,6 @@ MEDIA_URL = '/media/'
 # User表配置
 AUTH_USER_MODEL = 'user.User'
 USERNAME_FIELD = 'username'
+
+# 配置跨域
+CORS_ALLOW_ALL_ORIGINS = True

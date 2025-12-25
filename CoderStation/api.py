@@ -15,7 +15,7 @@ api = ChenNinjaAPI(
     description='问答平台接口',
     urls_namespace="code_station",
     parser=MyParser(),
-    renderer=MyRenderer()
+    renderer=MyRenderer(),
 )
 
 # 转换ninja_extra的报错同一出口
@@ -45,6 +45,8 @@ def transform_jwt_exception(request, exc):
     if message == 'Unauthorized':
         code = code_list.USER_UNAUTHORIZATION_ERRRR_CODE
         message = '用户没有经过授权就访问'
+    elif exc.status_code == 409:
+        code = code_list.EXIST_USERNAME
     return ChenResponse(code=code, status=status_code, data='', message=message, success=False)
 
 # 捕获pydantic的Validation异常

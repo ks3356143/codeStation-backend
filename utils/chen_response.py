@@ -19,7 +19,7 @@ class ChenResponse(HttpResponse):
         std_data = {
             "code": code,
             "data": data,
-            "message": message,
+            "errorMessage": message,
             "success": success
         }
         data = json.dumps(std_data, cls=DateEncoder)

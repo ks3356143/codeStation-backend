@@ -1,23 +1,29 @@
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.db.models import Q
-from apps.issue.models import Issue, IssueType, Comment, Quiz
-from ninja import Query
+from pathlib import Path
+from apps.issue.models import Issue, IssueType, Comment, Quiz, Book
+from ninja import Query, File, UploadedFile
 from ninja_extra import (
+    ControllerBase,
     route,
     api_controller,
     ModelControllerBase,
     ModelEndpointFactory,
     ModelConfig,
     ModelSchemaConfig,
-    paginate, ModelPagination
+    paginate,
+    ModelPagination
 )
 # schema和service导入
 from apps.issue.schema import IssueListOutSchema, IssueCreateSchema, CommentOutSchema, IssueRetrieveOutSchema, \
-    QuizOnlyTitleSchema
-from apps.issue.service import IssueModelService, CommentModelService
+    QuizOnlyTitleSchema, BookOutSchema
+from apps.issue.service import IssueModelService, CommentModelService, BookModelService
+from utils.chen_response import ChenResponse
 # 导入自己的分页
 from utils.pagination import MyPageNumberPaginationExtra, MyPaginatedResponseSchema
 # 导入过滤Schema
-from apps.issue.filterSchemas import IssueFilterSchema
+from apps.issue.filterSchemas import IssueFilterSchema, BookFilterSchema
 
 # ~~~~问答模型~~~~
 @api_controller('/issue', tags=['问答'])
@@ -27,6 +33,7 @@ class IssueModelController(ModelControllerBase):
                tags=['问答接口'], summary='搜索内容查询问答')
     @paginate(MyPageNumberPaginationExtra, page_size=10)
     def get_issue_by_content(self, filters: IssueFilterSchema = Query(...)):
+        """模糊查询issue"""
         searchValue = filters.searchValue
         q = Q(issueTitle__icontains=searchValue) | Q(issueContent__icontains=searchValue)
         issues = Issue.objects.filter(q)
@@ -90,6 +97,12 @@ class TypeModelController(ModelControllerBase):
 # ~~~~评论模型~~~~
 @api_controller('/comment', tags=['评论'])
 class CommentModelController(ModelControllerBase):
+    @route.get('/book/', response=MyPaginatedResponseSchema[CommentOutSchema], tags=['评论接口'])
+    @paginate(MyPageNumberPaginationExtra, page_size=5, max_page_size=10)
+    def get_book_comments(self, book_id: str):
+        query_set = self.service.get_all(book_id=book_id)
+        return query_set
+
     list_comments = ModelEndpointFactory.list(
         path="/?issue_id=str",
         queryset_getter=lambda self, **kw: self.service.get_all(**kw),
@@ -149,3 +162,62 @@ class QuizModelController(ModelControllerBase):
             depth=1,
         )
     )
+
+# ~~~~书籍接口~~~~
+@api_controller('/book', tags=['书籍'])
+class BookModelController(ModelControllerBase):
+    @route.get("/getBooksByContent/", response=MyPaginatedResponseSchema[BookOutSchema],
+               url_name='get_book_by_content',
+               tags=['书籍接口'], summary='搜索内容查询问答')
+    @paginate(MyPageNumberPaginationExtra, page_size=10)
+    def get_book_by_content(self, filters: BookFilterSchema = Query(...)):
+        """模糊查询book"""
+        searchValue = filters.searchValue
+        q = Q(title__icontains=searchValue) | Q(bookInfo__icontains=searchValue)
+        books = Book.objects.filter(q)
+        return books
+
+    list_books = ModelEndpointFactory.list(
+        path="/?type=str",
+        schema_out=BookOutSchema,
+        queryset_getter=lambda self, **kw: self.service.get_all(**kw),
+        pagination_class=MyPageNumberPaginationExtra,
+        pagination_response_schema=MyPaginatedResponseSchema,
+        max_page_size=100,
+        page_size=10,
+        tags=['书籍'],
+        summary="分页查询书籍并带有type参数",
+        url_name='book-list'
+    )
+    # 自定义操作服务
+    service_type = BookModelService
+    model_config = ModelConfig(
+        model=Book,
+        allowed_routes=['create', 'find_one'],
+        schema_config=ModelSchemaConfig(
+            read_only_fields=['id', 'commentNumber', 'scanNumber'],
+            exclude=set(),
+            # depth=1,
+        ),
+        # 替换默认retrieve_schema -> list、find_one
+        retrieve_schema=BookOutSchema
+    )
+
+# ~~~~其他接口~~~~
+@api_controller('/common', tags=['通用'])
+class ComminController(ControllerBase):
+    # ~~~~~~~头像统一上传接口~~~~~~~~
+    @route.post("/avatar", summary='上传头像统一接口', description='上传头像统一接口返回media路径')
+    def update_avatar(self, file: File[UploadedFile]):  # type:ignore
+        # 首先构建储存路径
+        avatar_subdir = Path('user_avatar')
+        # 防止文件名重复
+        from uuid import uuid4
+        file_extension = Path(file.name).suffix
+        safe_filename = f"{uuid4().hex}{file_extension}"
+        # 构建完整路径
+        storage_path = avatar_subdir / safe_filename
+        saved_path = default_storage.save(storage_path.__str__(), ContentFile(file.read()))
+        # 获取文件的访问 URL
+        file_url = default_storage.url(saved_path)
+        return ChenResponse(code=200, data=file_url)

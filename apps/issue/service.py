@@ -3,8 +3,7 @@ import typing as t
 from django.db.models import QuerySet
 from ninja_extra import ModelService
 from pydantic import BaseModel as PydanticModel
-
-from apps.issue.models import Issue2Type, IssueType, Issue
+from apps.issue.models import Issue2Type, IssueType, Issue, Book
 # 导入Schema以便类型提示
 from apps.issue.schema import IssueCreateSchema
 
@@ -56,19 +55,29 @@ class IssueModelService(ModelService):
             )
             raise TypeError(msg) from tex
 
-    # type_id输出
+    # scanNumber + 1
+    def get_one(self, pk: t.Any, **kwargs: t.Any) -> t.Any:
+        obj = super().get_one(pk, **kwargs)
+        obj.scanNumber += 1
+        obj.save()
+        return obj
 
-# ~~~~1.评论模型服务~~~~
+# ~~~~2.评论模型服务~~~~
 class CommentModelService(ModelService):
-    def get_all(self, **kwargs: t.Any) -> t.Union[QuerySet, t.List[t.Any]]:
+    def get_all(self, **kwargs: t.Any) -> t.Any:
         issue_id = kwargs.get('issue_id', None)
-        return self.model.objects.filter(issue_id=issue_id).order_by('-create_date')
+        book_id = kwargs.get('book_id', None)
+        if issue_id:
+            return self.model.objects.filter(issue_id=issue_id).order_by('-create_date')
+        if book_id:
+            return self.model.objects.filter(book_id=book_id).order_by('-create_date')
 
     def create(self, schema: PydanticModel, **kwargs: t.Any) -> t.Any:
+        print('进入此处：', schema, kwargs)
         data = schema.model_dump(by_alias=True, exclude={'type', 'commentType'})
         data.update(kwargs)
         try:
-            data['commentType'] = 1  # !!!!!!!!!!注意为了解决问题写死，后续写书籍记得改回来
+            data['commentType'] = schema.commentType.value
             instance = self.model._default_manager.create(**data)
             # 查询出type的obj
             type_obj_list = []
@@ -93,3 +102,23 @@ class CommentModelService(ModelService):
                     )
             )
             raise TypeError(msg) from tex
+
+# ~~~~3.书籍模型服务~~~~
+class BookModelService(ModelService):
+    def get_all(self, **kwargs: t.Any) -> t.Union[QuerySet, t.List[t.Any]]:
+        books = self.model.objects.all().order_by('-create_date')
+        type_id = kwargs.get('type')
+        if type_id == 'all':
+            return books
+        type_obj = IssueType.objects.filter(id=type_id).first()
+        if not type_obj:
+            return []
+        boos_ids = type_obj.issue2type_set.order_by('-iid__create_date').values_list('iid', flat=True)
+        return Book.objects.filter(id__in=boos_ids).order_by('-create_date')
+
+    def get_one(self, pk: t.Any, **kwargs: t.Any) -> t.Any:
+        obj = super().get_one(pk, **kwargs)
+        # 查询时候scanNumber + 1
+        obj.scanNumber += 1
+        obj.save()
+        return obj

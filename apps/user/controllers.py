@@ -1,11 +1,14 @@
+from pathlib import Path
 from ninja import UploadedFile, File
 from ninja_extra import api_controller, route
+from ninja.errors import HttpError
 from ninja_jwt.controller import TokenObtainPairController
 from django.contrib.auth import get_user_model
 from ninja_jwt.authentication import JWTAuth
 from utils.chen_response import ChenResponse
 # schemas imports
-from apps.user.schema import UserInfoOutSchema
+from apps.user.schema import UserInfoOutSchema, AdminInfoOutSchema, AdminUpdateInputSchema, \
+    AdminAddInputSchema
 
 User = get_user_model()  # type:ignore
 
@@ -42,4 +45,61 @@ class UserJWTController(TokenObtainPairController):
             user_obj.avatar.delete()  # 删除文件系统中的文件
         user_obj.avatar = file
         user_obj.save()
-        return ChenResponse(code=200, data=user_obj.avatar.url)
+        return ChenResponse(code=200, data=user_obj.avatar.url)  # type:ignore
+
+    # 修改用户name字段
+    @route.get("/modify_name", response=str, url_name='user_modify_name')
+    def modify_name(self, user_id: str, name: str):
+        user_obj = User.objects.filter(id=user_id).first()
+        if user_obj:
+            user_obj.name = name
+            user_obj.save()
+        return ChenResponse(code=200, data=user_obj.name)
+
+    # ~~~~~~~~管理员相关控制~~~~~~~~
+    # 获取所有管理员
+    @route.get("/admin", response=list[AdminInfoOutSchema], url_name='admin_all')
+    def get_all_admin(self):
+        return User.objects.filter(role='admin').all()
+
+    # 某个管理员权限改变
+    @route.get("/admin_enabled_change", response=str, url_name='admin_enabled')
+    def change_enabled(self, admin_id: str):
+        # 根据admin的id查询
+        admin_one = User.objects.filter(id=admin_id).first()
+        if admin_one:
+            admin_one.enabled = not admin_one.enabled
+            admin_one.save()
+        return ChenResponse(code=200, data='修改成功')
+
+    # 删除某个管理员
+    @route.delete("/admin_delete/{admin_id}")
+    def delete_admin(self, admin_id: str):
+        admin = User.objects.filter(id=admin_id).first()
+        if admin.is_superuser:
+            raise HttpError(403, "权限：无法删除唯一的超级管理员")
+        admin.avatar.delete()
+        admin.delete()
+        return ChenResponse(code=200, data='删除成功')
+
+    # 修改管理员
+    @route.patch("/admin/{id}")
+    def modify_admin(self, id: str, data: AdminAddInputSchema):
+        update_data = data.dict(exclude={"id", "username", "password"})
+        user = User.objects.get(id=id)
+        for key, value in update_data.items():
+            if hasattr(user, key):
+                setattr(user, key, value)
+        user.set_password(data.password)
+        user.save()
+        return ChenResponse(code=200, data="修改成功")
+
+    # 新增管理员
+    @route.post("/admin/add/")
+    def add_admin(self, data: AdminUpdateInputSchema):
+        extra_fields = data.dict()
+        extra_fields["role"] = "admin"
+        User.objects.create_user(username=extra_fields.pop("username"),
+                                 password=extra_fields.pop("password"),
+                                 **extra_fields)
+        return ChenResponse(code=200, data='新增成功')
