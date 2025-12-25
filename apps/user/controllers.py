@@ -1,4 +1,3 @@
-from pathlib import Path
 from ninja import UploadedFile, File
 from ninja_extra import api_controller, route
 from ninja.errors import HttpError
@@ -67,6 +66,8 @@ class UserJWTController(TokenObtainPairController):
     def change_enabled(self, admin_id: str):
         # 根据admin的id查询
         admin_one = User.objects.filter(id=admin_id).first()
+        if admin_one.is_superuser:
+            raise HttpError(403, "权限：无法更改管理员启用或禁用状态！")
         if admin_one:
             admin_one.enabled = not admin_one.enabled
             admin_one.save()
