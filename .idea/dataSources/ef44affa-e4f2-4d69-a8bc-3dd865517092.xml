@@ -2,102 +2,10 @@
 <dataSource name="CodeStation">
   <database-model serializer="dbm" dbms="MYSQL" family-id="MYSQL" format-version="4.54">
     <root id="1">
-      <DefaultCasing>lower/lower</DefaultCasing>
+      <DefaultAuthPlugin>mysql_native_password</DefaultAuthPlugin>
       <DefaultEngine>InnoDB</DefaultEngine>
       <DefaultTmpEngine>InnoDB</DefaultTmpEngine>
-      <Grants>|root||root|localhost|ALLOW_NONEXISTENT_DEFINER|G
-|root||root|localhost|ALTER|G
-|root||root|localhost|ALTER ROUTINE|G
-|root||root|localhost|APPLICATION_PASSWORD_ADMIN|G
-|root||mysql.infoschema|localhost|AUDIT_ABORT_EXEMPT|G
-|root||mysql.session|localhost|AUDIT_ABORT_EXEMPT|G
-|root||mysql.sys|localhost|AUDIT_ABORT_EXEMPT|G
-|root||root|localhost|AUDIT_ABORT_EXEMPT|G
-|root||root|localhost|AUDIT_ADMIN|G
-|root||mysql.session|localhost|AUTHENTICATION_POLICY_ADMIN|G
-|root||root|localhost|AUTHENTICATION_POLICY_ADMIN|G
-|root||mysql.session|localhost|BACKUP_ADMIN|G
-|root||root|localhost|BACKUP_ADMIN|G
-|root||root|localhost|BINLOG_ADMIN|G
-|root||root|localhost|BINLOG_ENCRYPTION_ADMIN|G
-|root||mysql.session|localhost|CLONE_ADMIN|G
-|root||root|localhost|CLONE_ADMIN|G
-|root||mysql.session|localhost|CONNECTION_ADMIN|G
-|root||root|localhost|CONNECTION_ADMIN|G
-|root||root|localhost|CREATE|G
-|root||root|localhost|CREATE ROLE|G
-|root||root|localhost|CREATE ROUTINE|G
-|root||root|localhost|CREATE TABLESPACE|G
-|root||root|localhost|CREATE TEMPORARY TABLES|G
-|root||root|localhost|CREATE USER|G
-|root||root|localhost|CREATE VIEW|G
-|root||root|localhost|DELETE|G
-|root||root|localhost|DROP|G
-|root||root|localhost|DROP ROLE|G
-|root||root|localhost|ENCRYPTION_KEY_ADMIN|G
-|root||root|localhost|EVENT|G
-|root||root|localhost|EXECUTE|G
-|root||root|localhost|FILE|G
-|root||mysql.infoschema|localhost|FIREWALL_EXEMPT|G
-|root||mysql.session|localhost|FIREWALL_EXEMPT|G
-|root||mysql.sys|localhost|FIREWALL_EXEMPT|G
-|root||root|localhost|FIREWALL_EXEMPT|G
-|root||root|localhost|FLUSH_OPTIMIZER_COSTS|G
-|root||root|localhost|FLUSH_PRIVILEGES|G
-|root||root|localhost|FLUSH_STATUS|G
-|root||root|localhost|FLUSH_TABLES|G
-|root||root|localhost|FLUSH_USER_RESOURCES|G
-|root||root|localhost|GROUP_REPLICATION_ADMIN|G
-|root||root|localhost|GROUP_REPLICATION_STREAM|G
-|root||root|localhost|INDEX|G
-|root||root|localhost|INNODB_REDO_LOG_ARCHIVE|G
-|root||root|localhost|INNODB_REDO_LOG_ENABLE|G
-|root||root|localhost|INSERT|G
-|root||root|localhost|LOCK TABLES|G
-|root||root|localhost|OPTIMIZE_LOCAL_TABLE|G
-|root||root|localhost|PASSWORDLESS_USER_ADMIN|G
-|root||mysql.session|localhost|PERSIST_RO_VARIABLES_ADMIN|G
-|root||root|localhost|PERSIST_RO_VARIABLES_ADMIN|G
-|root||root|localhost|PROCESS|G
-|root||root|localhost|REFERENCES|G
-|root||root|localhost|RELOAD|G
-|root||root|localhost|REPLICATION CLIENT|G
-|root||root|localhost|REPLICATION SLAVE|G
-|root||root|localhost|REPLICATION_APPLIER|G
-|root||root|localhost|REPLICATION_SLAVE_ADMIN|G
-|root||root|localhost|RESOURCE_GROUP_ADMIN|G
-|root||root|localhost|RESOURCE_GROUP_USER|G
-|root||root|localhost|ROLE_ADMIN|G
-|root||mysql.infoschema|localhost|SELECT|G
-|root||root|localhost|SELECT|G
-|root||root|localhost|SENSITIVE_VARIABLES_OBSERVER|G
-|root||root|localhost|SERVICE_CONNECTION_ADMIN|G
-|root||mysql.session|localhost|SESSION_VARIABLES_ADMIN|G
-|root||root|localhost|SESSION_VARIABLES_ADMIN|G
-|root||root|localhost|SET_ANY_DEFINER|G
-|root||root|localhost|SHOW DATABASES|G
-|root||root|localhost|SHOW VIEW|G
-|root||root|localhost|SHOW_ROUTINE|G
-|root||mysql.session|localhost|SHUTDOWN|G
-|root||root|localhost|SHUTDOWN|G
-|root||mysql.session|localhost|SUPER|G
-|root||root|localhost|SUPER|G
-|root||mysql.infoschema|localhost|SYSTEM_USER|G
-|root||mysql.session|localhost|SYSTEM_USER|G
-|root||mysql.sys|localhost|SYSTEM_USER|G
-|root||root|localhost|SYSTEM_USER|G
-|root||mysql.session|localhost|SYSTEM_VARIABLES_ADMIN|G
-|root||root|localhost|SYSTEM_VARIABLES_ADMIN|G
-|root||root|localhost|TABLE_ENCRYPTION_ADMIN|G
-|root||root|localhost|TELEMETRY_LOG_ADMIN|G
-|root||root|localhost|TRANSACTION_GTID_TAG|G
-|root||root|localhost|TRIGGER|G
-|root||root|localhost|UPDATE|G
-|root||root|localhost|XA_RECOVER_ADMIN|G
-|root||root|localhost|grant option|G
-performance_schema|schema||mysql.session|localhost|SELECT|G
-sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
-      <ServerVersion>8.4.3</ServerVersion>
+      <ServerVersion>8.0.26</ServerVersion>
     </root>
     <collation id="2" parent="1" name="armscii8_bin">
       <Charset>armscii8</Charset>
@@ -1086,6 +994,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <CollationName>utf8mb4_general_ci</CollationName>
     </table>
     <table id="310" parent="289" name="user_user">
+      <DetailsLevel>3</DetailsLevel>
       <Engine>InnoDB</Engine>
       <CollationName>utf8mb4_general_ci</CollationName>
     </table>
@@ -1709,120 +1618,130 @@ issuetype_id</ColNames>
       <Position>15</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <index id="438" parent="310" name="PRIMARY">
+    <column id="438" parent="310" name="enabled">
+      <NotNull>1</NotNull>
+      <Position>16</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <column id="439" parent="310" name="permission">
+      <NotNull>1</NotNull>
+      <Position>17</Position>
+      <StoredType>int|0s</StoredType>
+    </column>
+    <index id="440" parent="310" name="PRIMARY">
       <ColNames>id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="439" parent="310" name="username">
+    <index id="441" parent="310" name="username">
       <ColNames>username</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <key id="440" parent="310" name="PRIMARY">
+    <key id="442" parent="310" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <key id="441" parent="310" name="username">
+    <key id="443" parent="310" name="username">
       <UnderlyingIndexName>username</UnderlyingIndexName>
     </key>
-    <column id="442" parent="311" name="id">
+    <column id="444" parent="311" name="id">
       <AutoIncrement>1</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="443" parent="311" name="user_id">
+    <column id="445" parent="311" name="user_id">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>varchar(22)|0s</StoredType>
     </column>
-    <column id="444" parent="311" name="group_id">
+    <column id="446" parent="311" name="group_id">
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <foreign-key id="445" parent="311" name="user_user_groups_user_id_13f9a20d_fk_user_user_uid">
+    <foreign-key id="447" parent="311" name="user_user_groups_user_id_13f9a20d_fk_user_user_uid">
       <ColNames>user_id</ColNames>
       <RefColNames>id</RefColNames>
       <RefTableName>user_user</RefTableName>
     </foreign-key>
-    <foreign-key id="446" parent="311" name="user_user_groups_group_id_c57f13c0_fk_auth_group_id">
+    <foreign-key id="448" parent="311" name="user_user_groups_group_id_c57f13c0_fk_auth_group_id">
       <ColNames>group_id</ColNames>
       <RefColNames>id</RefColNames>
       <RefTableName>auth_group</RefTableName>
     </foreign-key>
-    <index id="447" parent="311" name="PRIMARY">
+    <index id="449" parent="311" name="PRIMARY">
       <ColNames>id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="448" parent="311" name="user_user_groups_user_id_group_id_bb60391f_uniq">
+    <index id="450" parent="311" name="user_user_groups_user_id_group_id_bb60391f_uniq">
       <ColNames>user_id
 group_id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="449" parent="311" name="user_user_groups_group_id_c57f13c0_fk_auth_group_id">
+    <index id="451" parent="311" name="user_user_groups_group_id_c57f13c0_fk_auth_group_id">
       <ColNames>group_id</ColNames>
       <Type>btree</Type>
     </index>
-    <key id="450" parent="311" name="PRIMARY">
+    <key id="452" parent="311" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <key id="451" parent="311" name="user_user_groups_user_id_group_id_bb60391f_uniq">
+    <key id="453" parent="311" name="user_user_groups_user_id_group_id_bb60391f_uniq">
       <UnderlyingIndexName>user_user_groups_user_id_group_id_bb60391f_uniq</UnderlyingIndexName>
     </key>
-    <column id="452" parent="312" name="id">
+    <column id="454" parent="312" name="id">
       <AutoIncrement>1</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="453" parent="312" name="user_id">
+    <column id="455" parent="312" name="user_id">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>varchar(22)|0s</StoredType>
     </column>
-    <column id="454" parent="312" name="permission_id">
+    <column id="456" parent="312" name="permission_id">
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <foreign-key id="455" parent="312" name="user_user_user_permissions_user_id_31782f58_fk_user_user_uid">
+    <foreign-key id="457" parent="312" name="user_user_user_permissions_user_id_31782f58_fk_user_user_uid">
       <ColNames>user_id</ColNames>
       <RefColNames>id</RefColNames>
       <RefTableName>user_user</RefTableName>
     </foreign-key>
-    <foreign-key id="456" parent="312" name="user_user_user_permi_permission_id_ce49d4de_fk_auth_perm">
+    <foreign-key id="458" parent="312" name="user_user_user_permi_permission_id_ce49d4de_fk_auth_perm">
       <ColNames>permission_id</ColNames>
       <RefColNames>id</RefColNames>
       <RefTableName>auth_permission</RefTableName>
     </foreign-key>
-    <index id="457" parent="312" name="PRIMARY">
+    <index id="459" parent="312" name="PRIMARY">
       <ColNames>id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="458" parent="312" name="user_user_user_permissions_user_id_permission_id_64f4d5b8_uniq">
+    <index id="460" parent="312" name="user_user_user_permissions_user_id_permission_id_64f4d5b8_uniq">
       <ColNames>user_id
 permission_id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="459" parent="312" name="user_user_user_permi_permission_id_ce49d4de_fk_auth_perm">
+    <index id="461" parent="312" name="user_user_user_permi_permission_id_ce49d4de_fk_auth_perm">
       <ColNames>permission_id</ColNames>
       <Type>btree</Type>
     </index>
-    <key id="460" parent="312" name="PRIMARY">
+    <key id="462" parent="312" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <key id="461" parent="312" name="user_user_user_permissions_user_id_permission_id_64f4d5b8_uniq">
+    <key id="463" parent="312" name="user_user_user_permissions_user_id_permission_id_64f4d5b8_uniq">
       <UnderlyingIndexName>user_user_user_permissions_user_id_permission_id_64f4d5b8_uniq</UnderlyingIndexName>
     </key>
   </database-model>

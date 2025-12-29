@@ -62,7 +62,7 @@ class UserJWTController(TokenObtainPairController):
     @paginate(PageNumberPaginationExtra, page_size=10)
     def get_page_users(self, filters: UserFilterSchema = Query(...)):
         users = User.objects.all()
-        users = filters.filter(users)
+        users = filters.filter(users).filter(role="user")
         return users
 
     # ~~~~~~~~管理员相关控制~~~~~~~~
