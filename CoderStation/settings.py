@@ -80,3 +80,9 @@ USERNAME_FIELD = 'username'
 
 # 配置跨域
 CORS_ALLOW_ALL_ORIGINS = True
+
+# ninja_extra配置
+## 配置默认分页器
+NINJA_EXTRA = {
+    'PAGINATION_CLASS': 'ninja_extra.pagination.PageNumberPaginationExtra'
+}

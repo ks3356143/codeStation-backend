@@ -1,5 +1,6 @@
-from ninja import UploadedFile, File
+from ninja import UploadedFile, File, Query
 from ninja_extra import api_controller, route
+from ninja_extra.pagination import paginate, PageNumberPaginationExtra, PaginatedResponseSchema
 from ninja.errors import HttpError
 from ninja_jwt.controller import TokenObtainPairController
 from django.contrib.auth import get_user_model
@@ -7,7 +8,7 @@ from ninja_jwt.authentication import JWTAuth
 from utils.chen_response import ChenResponse
 # schemas imports
 from apps.user.schema import UserInfoOutSchema, AdminInfoOutSchema, AdminUpdateInputSchema, \
-    AdminAddInputSchema
+    AdminAddInputSchema, UserFilterSchema
 
 User = get_user_model()  # type:ignore
 
@@ -54,6 +55,15 @@ class UserJWTController(TokenObtainPairController):
             user_obj.name = name
             user_obj.save()
         return ChenResponse(code=200, data=user_obj.name)
+
+    # 分页获取用户数据
+    @route.get("/get_page_users", response=PaginatedResponseSchema[UserInfoOutSchema],
+               url_name='user_page', summary="分页获取用户")
+    @paginate(PageNumberPaginationExtra, page_size=10)
+    def get_page_users(self, filters: UserFilterSchema = Query(...)):
+        users = User.objects.all()
+        users = filters.filter(users)
+        return users
 
     # ~~~~~~~~管理员相关控制~~~~~~~~
     # 获取所有管理员

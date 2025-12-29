@@ -2,16 +2,22 @@ from typing import Optional
 from django.contrib.auth import get_user_model
 from ninja.errors import HttpError
 from pydantic import field_validator, model_validator
-from ninja import ModelSchema, Schema
+from ninja import ModelSchema, FilterSchema, Schema, Field
 
 User = get_user_model()
 
+# ~~~~~~~~~~用户模块~~~~~~~~~~
 # 1.输出：查询用户信息
 class UserInfoOutSchema(ModelSchema):
     class Meta:
         model = User
-        exclude = ['password', 'groups', 'user_permissions', 'is_superuser', 'is_staff', 'is_active',
-                   'role', 'permission', 'enabled']
+        exclude = ['groups', 'user_permissions', 'is_superuser', 'is_staff', 'is_active',
+                   'role']
+
+# 2.搜索：搜索用户信息
+class UserFilterSchema(FilterSchema):
+    name: Optional[str] = Field(None, q='name__icontains')
+    username: Optional[str] = Field(None, q='username__icontains')
 
 # ~~~~~~~~~~管理员模块~~~~~~~~~~
 # 2.输出：管理员信息
