@@ -8,7 +8,7 @@ from ninja_jwt.authentication import JWTAuth
 from utils.chen_response import ChenResponse
 # schemas imports
 from apps.user.schema import UserInfoOutSchema, AdminInfoOutSchema, AdminUpdateInputSchema, \
-    AdminAddInputSchema, UserFilterSchema
+    AdminAddInputSchema, UserFilterSchema, UserAddInputSchema, UserUpdateInputSchema
 
 User = get_user_model()  # type:ignore
 
@@ -65,6 +65,28 @@ class UserJWTController(TokenObtainPairController):
         users = filters.filter(users).filter(role="user")
         return users
 
+    # 新增用户
+    @route.post("/add/")
+    def add_user(self, data: UserAddInputSchema):
+        extra_fields = data.dict(exclude_none=True)
+        extra_fields["role"] = "user"
+        User.objects.create_user(username=extra_fields.pop("username"),
+                                 password=extra_fields.pop("password"),
+                                 **extra_fields)
+        return ChenResponse(code=200, data='新增用户成功')
+
+    # 修改用户
+    @route.patch("/user/{id}")
+    def modify_user(self, id: str, data: UserUpdateInputSchema):
+        update_data = data.dict(exclude={"id", "username", "password"})
+        user = User.objects.get(id=id)
+        for key, value in update_data.items():
+            if hasattr(user, key):
+                setattr(user, key, value)
+        user.set_password(data.password)
+        user.save()
+        return ChenResponse(code=200, data="修改成功")
+
     # ~~~~~~~~管理员相关控制~~~~~~~~
     # 获取所有管理员
     @route.get("/admin", response=list[AdminInfoOutSchema], url_name='admin_all')
@@ -89,7 +111,9 @@ class UserJWTController(TokenObtainPairController):
         admin = User.objects.filter(id=admin_id).first()
         if admin.is_superuser:
             raise HttpError(403, "权限：无法删除唯一的超级管理员")
-        admin.avatar.delete()
+        # 判断是否为default_avatar
+        if not admin.avatar == '/user_avatar/default.png':
+            admin.avatar.delete()
         admin.delete()
         return ChenResponse(code=200, data='删除成功')
 
@@ -108,7 +132,7 @@ class UserJWTController(TokenObtainPairController):
     # 新增管理员
     @route.post("/admin/add/")
     def add_admin(self, data: AdminUpdateInputSchema):
-        extra_fields = data.dict()
+        extra_fields = data.dict(exclude_none=True)
         extra_fields["role"] = "admin"
         User.objects.create_user(username=extra_fields.pop("username"),
                                  password=extra_fields.pop("password"),
