@@ -6,6 +6,7 @@ from pydantic import BaseModel as PydanticModel
 from apps.issue.models import Issue2Type, IssueType, Issue, Book
 # 导入Schema以便类型提示
 from apps.issue.schema import IssueCreateSchema
+from utils.chen_response import ChenResponse
 
 # ~~~~1.问答模型服务~~~~
 class IssueModelService(ModelService):
@@ -18,7 +19,8 @@ class IssueModelService(ModelService):
             if enabled.lower() in ('false', '0', 'undefined', 'null'):
                 status = False
         # 2.type的筛选
-        issues = issues.filter(status=status).order_by('-create_date')
+        if enabled != 'all':
+            issues = issues.filter(status=status).order_by('-create_date')
         type_id = kwargs.get('type')
         if type_id == 'all':
             return issues
@@ -122,3 +124,22 @@ class BookModelService(ModelService):
         obj.scanNumber += 1
         obj.save()
         return obj
+
+# ~~~~4.考试题服务~~~~
+class QuizModelService(ModelService):
+    def get_all(self, **kwargs: t.Any) -> t.Union[QuerySet, t.List[t.Any]]:
+        qs = super().get_all(**kwargs)
+        return qs
+
+    def update(self, schema: PydanticModel, **kwargs: t.Any) -> t.Any:
+        quiz_obj = kwargs.pop('instance', None)
+        if quiz_obj:
+            update_dict = schema.model_dump(exclude_none=True)
+            type_id = update_dict.pop('type', None)
+            quiz_obj.type_id = type_id
+            for key, value in update_dict.items():
+                if hasattr(quiz_obj, key):
+                    setattr(quiz_obj, key, value)
+            quiz_obj.save()
+            return ChenResponse(status=200, message='修改成功')
+        return ChenResponse(status=200, message='未找到响应书籍')

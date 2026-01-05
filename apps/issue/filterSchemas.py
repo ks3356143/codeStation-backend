@@ -10,3 +10,9 @@ class IssueFilterSchema(FilterSchema):
 class BookFilterSchema(FilterSchema):
     searchValue: Optional[str] = Field("")
     searchOption: Optional[str] = Field("book")
+    type: Optional[str] = Field("all")
+
+# 3、搜索quiz的标题和分类
+class QuizFilterSchema(FilterSchema):
+    quizTitle: Optional[str] = Field("")
+    type: Optional[str] = Field("all")

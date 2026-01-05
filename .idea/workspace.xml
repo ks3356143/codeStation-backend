@@ -58,15 +58,16 @@
     "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
     "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "E:/pycharmProjects/codeStation",
+    "last_opened_file_path": "E:/pycharmProjects/CodeStation/media/user_avatar",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "editor.preferences.completion",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
     "to.speed.mode.migration.done": "true",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\pycharmProjects\CodeStation\media\user_avatar" />
       <recent name="E:\pycharmProjects\CoderStation\media\user_avatar" />
     </key>
     <key name="MoveFile.RECENT_KEYS">

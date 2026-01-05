@@ -1,7 +1,7 @@
 from apps.user.models import User
-from apps.issue.models import Issue, Issue2Type, IssueType, Comment, Book
+from apps.issue.models import Issue, Issue2Type, IssueType, Comment, Book, Quiz
 from ninja import ModelSchema, Schema
-from typing import List
+from typing import List, Optional
 
 # 预制type
 class TypeModelSchema(ModelSchema):
@@ -81,6 +81,13 @@ class QuizOnlyTitleSchema(Schema):
     type: TypeModelSchema
     titles: list[QuizTitleSchema]
 
+class QuizModelOutSchema(ModelSchema):
+    type: TypeModelSchema
+
+    class Meta:
+        model = Quiz
+        fields = "__all__"
+
 # ~~~~Book Schema~~~~
 class BookOutSchema(ModelSchema):
     type: TypeModelSchema
@@ -88,3 +95,12 @@ class BookOutSchema(ModelSchema):
     class Meta:
         model = Book
         exclude = ['type']
+
+class BookUpdateInputSchema(Schema):
+    bookInfo: str
+    title: str
+    type_id: str
+    bookInfo: str
+    picture: Optional[str] = None
+    downloadLink: str
+    requirePoints: int
