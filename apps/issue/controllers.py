@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal
 
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
@@ -16,9 +16,11 @@ from ninja_extra import (
     paginate,
     route,
 )
+from ninja_extra.ordering import ordering
 
 # 导入过滤Schema
-from apps.issue.filterSchemas import BookFilterSchema, IssueFilterSchema, QuizFilterSchema
+from apps.issue.filterSchemas import BookFilterSchema, IssueFilterSchema, QuizFilterSchema, \
+    CommentFilterSchema
 from apps.issue.models import Book, Comment, Issue, IssueType, Quiz
 from apps.issue.schema import BookUpdateInputSchema, QuizModelOutSchema
 
@@ -66,7 +68,7 @@ class IssueModelController(ModelControllerBase):
 
     # 接口工程：条件查询所有Issue(注意屏蔽自动接口)
     list_issues = ModelEndpointFactory.list(
-        path="/?enabled=str&type=str",
+        path="/?enabled=str&type=str&issueTitle=str",
         schema_out=IssueListOutSchema,
         queryset_getter=lambda self, **kw: self.service.get_all(**kw),
         pagination_class=MyPageNumberPaginationExtra,
@@ -105,7 +107,7 @@ class IssueModelController(ModelControllerBase):
 class TypeModelController(ModelControllerBase):
     model_config = ModelConfig(
         model=IssueType,
-        allowed_routes=["list", 'find_one'],
+        allowed_routes=["list", 'find_one', 'create', 'delete'],
         schema_config=ModelSchemaConfig(
             read_only_fields=["id"],
             exclude=set(),
@@ -125,8 +127,18 @@ class CommentModelController(ModelControllerBase):
     @route.get('/book/', response=MyPaginatedResponseSchema[CommentOutSchema], tags=['评论接口'])
     @paginate(MyPageNumberPaginationExtra, page_size=5, max_page_size=10)
     def get_book_comments(self, book_id: str):
+        """分页查询书籍评论"""
         query_set = self.service.get_all(book_id=book_id)
         return query_set
+
+    @route.get("/book_list/", response=MyPaginatedResponseSchema[CommentOutSchema], tags=['评论接口'],
+               summary='分页检索评论')
+    @paginate(MyPageNumberPaginationExtra, page_size=10)
+    def get_all_comments(self, filters: CommentFilterSchema = Query(...)):
+        """检索评论接口"""
+        qs = Comment.objects.all().order_by("-create_date")
+        qs = filters.filter(qs)
+        return qs
 
     list_comments = ModelEndpointFactory.list(
         path="/?issue_id=str",
@@ -137,7 +149,7 @@ class CommentModelController(ModelControllerBase):
         max_page_size=20,
         page_size=5,
         tags=['评论接口'],
-        summary="分页查询评论",
+        summary="分页查询问答评论",
         url_name='issue-list'
     )
 

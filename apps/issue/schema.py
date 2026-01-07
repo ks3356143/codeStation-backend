@@ -15,6 +15,12 @@ class NestUserOutSchema(ModelSchema):
         model = User
         fields = ['id', 'username', 'name']
 
+# 给commnet嵌套的issue
+class IssueOutSchema(ModelSchema):
+    class Meta:
+        model = Issue
+        fields = '__all__'
+
 class IssueListOutSchema(ModelSchema):
     user: NestUserOutSchema
     create_date: str
@@ -68,9 +74,13 @@ class IssueCreateSchema(ModelSchema):
 
 # ~~~~Comment Schema~~~~
 class CommentOutSchema(ModelSchema):
+    user: NestUserOutSchema
+    book: Optional["BookOutSchema"] = None
+    issue: Optional["IssueListOutSchema"] = None
+
     class Meta:
         model = Comment
-        fields = "__all__"
+        exclude = ['user', 'book', 'issue', 'type']
 
 # ~~~~Quiz Schema~~~~
 class QuizTitleSchema(Schema):

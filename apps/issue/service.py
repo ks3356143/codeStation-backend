@@ -10,8 +10,9 @@ from utils.chen_response import ChenResponse
 
 # ~~~~1.问答模型服务~~~~
 class IssueModelService(ModelService):
-    def get_all(self, **kwargs: t.Any) -> t.Union[QuerySet, t.List[t.Any]]:
-        issues = self.model.objects.all()
+    def get_all(self, issueTitle: t.Optional[str] = "", **kwargs: t.Any) -> t.Union[QuerySet, t.List[t.Any]]:
+        # 首先对issueTitle模糊查询
+        issues = self.model.objects.filter(issueTitle__icontains=issueTitle).order_by('-create_date')
         # 1.status字段筛选
         enabled = kwargs.get('enabled')
         status = True
@@ -20,7 +21,7 @@ class IssueModelService(ModelService):
                 status = False
         # 2.type的筛选
         if enabled != 'all':
-            issues = issues.filter(status=status).order_by('-create_date')
+            issues = issues.filter(status=status)
         type_id = kwargs.get('type')
         if type_id == 'all':
             return issues
@@ -73,6 +74,7 @@ class CommentModelService(ModelService):
             return self.model.objects.filter(issue_id=issue_id).order_by('-create_date')
         if book_id:
             return self.model.objects.filter(book_id=book_id).order_by('-create_date')
+        return self.model.objects.all().order_by("-create_date")
 
     def create(self, schema: PydanticModel, **kwargs: t.Any) -> t.Any:
         print('进入此处：', schema, kwargs)

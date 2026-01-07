@@ -86,3 +86,9 @@ CORS_ALLOW_ALL_ORIGINS = True
 NINJA_EXTRA = {
     'PAGINATION_CLASS': 'ninja_extra.pagination.PageNumberPaginationExtra'
 }
+
+# ninja_jwt配置
+NINJA_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=2),  # 访问令牌时间
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),  # 刷新令牌时间
+}
