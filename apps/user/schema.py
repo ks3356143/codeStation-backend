@@ -34,8 +34,7 @@ class AvatarPathMixin:
 class UserInfoOutSchema(ModelSchema):
     class Meta:
         model = User
-        exclude = ['groups', 'user_permissions', 'is_superuser', 'is_staff', 'is_active',
-                   'role']
+        exclude = ['groups', 'user_permissions', 'is_superuser', 'is_staff', 'is_active']
 
 # 2.搜索：搜索用户信息
 class UserFilterSchema(FilterSchema):

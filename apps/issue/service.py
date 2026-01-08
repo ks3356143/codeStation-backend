@@ -117,8 +117,8 @@ class BookModelService(ModelService):
         type_obj = IssueType.objects.filter(id=type_id).first()
         if not type_obj:
             return []
-        boos_ids = type_obj.issue2type_set.order_by('-iid__create_date').values_list('iid', flat=True)
-        return Book.objects.filter(id__in=boos_ids).order_by('-create_date')
+        book_ids = type_obj.book_set.order_by('-id__create_date').values_list('id', flat=True)
+        return Book.objects.filter(id__in=book_ids).order_by('-create_date')
 
     def get_one(self, pk: t.Any, **kwargs: t.Any) -> t.Any:
         obj = super().get_one(pk, **kwargs)

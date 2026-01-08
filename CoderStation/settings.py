@@ -72,7 +72,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Media配置
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
+MEDIA_URL = '/api/media/'
 
 # User表配置
 AUTH_USER_MODEL = 'user.User'
